@@ -1,9 +1,0 @@
-body { background:#f4f4f4; font-family: Arial, sans-serif; }
-.container { width: 720px; margin: 30px auto; background: #fff; padding:20px; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.controls { display:flex; gap:8px; margin-bottom:12px; }
-#chat { height: 360px; overflow-y:auto; border:1px solid #ddd; padding:12px; border-radius:6px; background:#fafafa; }
-.user { color:#0a58ca; margin:8px 0; }
-.ia { color:#198754; margin:8px 0; }
-.inputRow { display:flex; gap:8px; margin-top:12px; }
-input[type="text"], input[type="email"], select { padding:8px; border:1px solid #ccc; border-radius:4px; flex:1; }
-button { padding:8px 14px; border-radius:4px; border:none; background:#0d6efd; color:white; cursor:pointer; }
