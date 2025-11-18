@@ -1,0 +1,25 @@
+{
+  "nombre": "MiTiendaTech",
+  "servicios": {
+    "software": [
+      "Desarrollo de aplicaciones web",
+      "Desarrollo de aplicaciones m\u00f3viles",
+      "Sistemas cliente-servidor",
+      "Integraci\u00f3n con APIs",
+      "Sistemas con bases de datos",
+      "Automatizaci\u00f3n empresarial",
+      "Desarrollo en C++, Python, JavaScript, Node.js"
+    ],
+    "electronica": [
+      "Dise\u00f1o de circuitos electr\u00f3nicos",
+      "Programaci\u00f3n de microcontroladores",
+      "Sistemas IoT",
+      "Sensores y automatizaci\u00f3n",
+      "Prototipos electr\u00f3nicos"
+    ]
+  },
+  "contacto": {
+    "email": "contacto@mitiendatech.com",
+    "telefono": "+57 300 000 0000"
+  }
+}

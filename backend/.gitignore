@@ -1,0 +1,11 @@
+# .gitignore
+# Dependencias de Node
+/backend/node_modules
+/frontend/node_modules
+
+# Archivos Sensibles y Bases de Datos
+/backend/.env
+/backend/*.db
+
+# Logs y otros
+npm-debug.log*
