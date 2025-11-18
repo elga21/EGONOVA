@@ -121,7 +121,7 @@ app.post("/chat", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3.1-8b-instruct",
+        model: "mistralai/mistral-7b-instruct-v0.2",
         messages: messagesToSend
       })
     });
