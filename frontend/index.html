@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>MiTiendaTech - Asistente IA</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="container">
+        <h2>MiTiendaTech - Asistente IA</h2>
+
+        <div class="controls">
+            <select id="modoSelect">
+                <option value="vendedor">Vendedor</option>
+                <option value="tecnico">Técnico</option>
+                <option value="soporte">Soporte</option>
+                <option value="cotizador">Cotizador</option>
+            </select>
+
+            <input id="nombre" type="text" placeholder="Tu nombre (opcional)" />
+            <input id="email" type="email" placeholder="Tu email (opcional)" />
+        </div>
+
+        <div id="chat" class="chat"></div>
+
+        <div class="inputRow">
+            <input id="inputMsg" type="text" placeholder="Describe tu proyecto..." />
+            <button id="sendBtn">Enviar</button>
+            <button id="contactBtn">Enviar Contacto</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
