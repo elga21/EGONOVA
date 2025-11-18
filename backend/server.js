@@ -112,7 +112,7 @@ app.post("/chat", async (req, res) => {
     ];
 
     try {
-        // 4. Llamada a GROQ (IA) - CAMBIO DE API
+        // 4. Llamada a GROQ (IA) - CORRECCIÓN DE MODELO
         const respuesta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -121,8 +121,8 @@ app.post("/chat", async (req, res) => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                // USA EL MODELO MISTRAL 7B
-                model: "mistralai/mistral-7b-instruct", 
+                // CORRECCIÓN: USAR MODELO MIXTRAL DISPONIBLE EN GROQ
+                model: "mixtral-8x7b-instruct-v0.1", 
                 messages: messagesToSend,
                 max_tokens: 512 // Límite de tokens para estabilidad
             })
