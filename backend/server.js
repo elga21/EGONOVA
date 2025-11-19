@@ -5,7 +5,7 @@ import fs from "fs";
 import fetch from "node-fetch";
 import { initDB } from "./db.js";
 import { cotizar } from "./cotizador.js";
-import { generateLocalResponse } from "./ia_local.js"; // <-- NUEVO: Para la IA Local
+import { generateLocalResponse } from "./ia_local.js"; // <-- Para la IA Local (NLP)
 import nodemailer from "nodemailer";
 
 const app = express();
