@@ -122,7 +122,7 @@ app.post("/chat", async (req, res) => {
             },
             body: JSON.stringify({
                 // CORRECCIÓN: USAR MODELO MIXTRAL DISPONIBLE EN GROQ
-                model: "mixtral-8x7b-instruct-v0.1", 
+                model: "mllama3-8b-8192", 
                 messages: messagesToSend,
                 max_tokens: 512 // Límite de tokens para estabilidad
             })
