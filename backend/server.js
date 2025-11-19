@@ -1,14 +1,12 @@
 // backend/server.js
 import express from "express";
 import cors from "cors";
-
 import fs from "fs";
 import fetch from "node-fetch";
 import { initDB } from "./db.js";
 import { cotizar } from "./cotizador.js";
+import { generateLocalResponse } from "./ia_local.js"; // <-- NUEVO: Para la IA Local
 import nodemailer from "nodemailer";
-
-
 
 const app = express();
 app.use(cors());
@@ -17,24 +15,11 @@ app.use(express.json());
 let db;
 (async () => { db = await initDB(); })();
 
-// Prompt base (tema de la tienda) - ¡Se mantiene en español!
-const sistema = {
-    role: "system",
-    content: `
-Eres el asistente oficial de MiTiendaTech, especialista en servicios de desarrollo de software y electrónica.
-Reglas:
-- RESPONDER SOLO sobre los servicios de MiTiendaTech.
-- Clasificar solicitudes y usar un formato claro.
-- Si la consulta está fuera de tema, responder: "Solo puedo responder preguntas relacionadas con los servicios de MiTiendaTech."
-- Siempre en español.
-`
-};
-
-// Memoria corta (Ajustado a 5 según el documento)
+// Memoria corta (Ajustado a 5)
 const MEMORY_LIMIT = 5; 
 const sessions = {};
 
-// nodemailer (se mantiene la lógica de correo)
+// nodemailer
 let transporter = null;
 if (process.env.SMTP_HOST && process.env.SMTP_USER) {
     transporter = nodemailer.createTransport({
@@ -81,96 +66,39 @@ app.post("/chat", async (req, res) => {
     // 2. Calcular Cotización
     const cotizacionTexto = cotizar(mensaje);
 
-    // 3. Preparar contexto (Memoria, Data.json y Modos)
-    let memoria = sessions[session_id] ? sessions[session_id] : [];
-    
-    let infoTienda = {};
-    try {
-        if (fs.existsSync("./data.json")) {
-            infoTienda = JSON.parse(fs.readFileSync("./data.json","utf8"));
-        }
-    } catch(e){ console.error(e); }
-
+    // 3. Obtener el modo
     const modo = (sessions[session_id] && sessions[session_id].mode) || "vendedor";
 
-    const promptMode = {
-        role: "system",
-        content: `Modo actual: ${modo}. Actúa según ese rol (vendedor/técnico/soporte/cotizador). Clasifica la solicitud y ofrece preguntas para clarificar si hace falta.`
-    };
-
-    const systemInfo = {
-        role: "system",
-        content: "Información interna: " + JSON.stringify(infoTienda)
-    };
-
-    const messagesToSend = [
-        sistema,
-        promptMode,
-        systemInfo,
-        ...memoria,
-        { role: "user", content: mensaje }
-    ];
-
+    // 4. GENERAR RESPUESTA LOCAL (REEMPLAZANDO LA LLAMADA A GROQ)
+    let textoIA = "";
     try {
-        // 4. Llamada a GROQ (IA) - CORRECCIÓN DE MODELO
-        const respuesta = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                // USA LA NUEVA VARIABLE DE ENTORNO
-                "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                // CORRECCIÓN: USAR MODELO MIXTRAL DISPONIBLE EN GROQ
-                model: "mllama3-8b-8192", 
-                messages: messagesToSend,
-                max_tokens: 512 // Límite de tokens para estabilidad
-            })
-        });
-
-        // Manejo de errores de API
-        if (!respuesta.ok) {
-            const errorText = await respuesta.text();
-            console.error(`Error HTTP ${respuesta.status}: ${errorText}`);
-            // El mensaje de error indica que es Groq ahora
-            return res.status(respuesta.status).json({ 
-                respuesta: `Error del proveedor IA Groq: ${respuesta.status}. Verifique clave GROQ_API_KEY o modelo.` 
-            });
-        }
-        
-        const data = await respuesta.json();
-        // Mensaje de depuración para identificar errores de Groq
-        const textoIA = data?.choices?.[0]?.message?.content || "No se obtuvo respuesta de la IA (Groq).";
-
-        if (textoIA === "No se obtuvo respuesta de la IA (Groq).") {
-            console.error("Respuesta vacía o malformada de la IA:", JSON.stringify(data));
-        }
-
-        // 5. Guardar respuesta de IA
-        await pushMessage(session_id, "assistant", textoIA);
-
-        // 6. Registrar Solicitud en DB
-        await db.run(
-            `INSERT INTO solicitudes (nombre, email, tipo, mensaje, cotizacion, respuesta_ia) VALUES (?, ?, ?, ?, ?, ?)`,
-            nombre || null,
-            email || null,
-            modo,
-            mensaje,
-            cotizacionTexto,
-            textoIA
-        );
-
-        // 7. Respuesta al Frontend
-        res.json({
-            respuesta: textoIA,
-            cotizacion: cotizacionTexto,
-            modo
-        });
-
+        // Llama a la lógica de IA local basada en la librería compromise
+        textoIA = generateLocalResponse(mensaje, modo, cotizacionTexto);
     } catch (error) {
-        console.error("Error IA (Catch):", error);
-        res.status(500).json({ respuesta: "Error conectando a la IA." });
+        console.error("Error IA Local:", error);
+        textoIA = "Error interno del asistente (NLP).";
     }
+
+    // 5. Guardar respuesta de IA
+    await pushMessage(session_id, "assistant", textoIA);
+
+    // 6. Registrar Solicitud en DB
+    await db.run(
+        `INSERT INTO solicitudes (nombre, email, tipo, mensaje, cotizacion, respuesta_ia) VALUES (?, ?, ?, ?, ?, ?)`,
+        nombre || null,
+        email || null,
+        modo,
+        mensaje,
+        cotizacionTexto,
+        textoIA
+    );
+
+    // 7. Respuesta al Frontend
+    res.json({
+        respuesta: textoIA,
+        cotizacion: cotizacionTexto,
+        modo
+    });
 });
 
 // Ruta /contact: Se mantiene sin cambios
